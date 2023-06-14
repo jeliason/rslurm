@@ -1,14 +1,15 @@
 #!/bin/bash
 #
-#SBATCH --ntasks=1
+#SBATCH --array=0-{{{max_node}}}{{{job_array_task_limit}}}
+#SBATCH --cpus-per-task={{{cpus_per_node}}}
 #SBATCH --job-name={{{jobname}}}
-#SBATCH --output=slurm_0.out
 #SBATCH --mail-user=joelne@umich.edu
 #SBATCH --mail-type=END,FAIL
+#SBATCH --output=slurm_%a.out
 {{#flags}}
 #SBATCH --{{{name}}}
 {{/flags}}
 {{#options}}
 #SBATCH --{{{name}}}={{{value}}}
 {{/options}}
-Rscript --vanilla slurm_run.R
+singularity exec ../inla.sif Rscript --no-restore --no-save slurm_run.R

@@ -60,6 +60,7 @@
 #'   Details below for more information.
 #' @param submit Whether or not to submit the job to the cluster with 
 #'   \code{sbatch}; see Details below for more information.
+#' @param upload whether or not to upload the job to Great Lakes
 #' @return A \code{slurm_job} object containing the \code{jobname} and the number
 #'   of \code{nodes} effectively used.
 #' @seealso \code{\link{slurm_apply}} to parallelize a function over a parameter
@@ -71,7 +72,7 @@
 slurm_call <- function(f, params = list(), jobname = NA, global_objects = NULL, add_objects = NULL, 
                        pkgs = rev(.packages()), libPaths = NULL, rscript_path = NULL,
                        r_template = NULL, sh_template = NULL, slurm_options = list(), 
-                       submit = TRUE) {
+                       submit = TRUE, upload = NULL) {
     # Check inputs
     if (!is.function(f)) {
         stop("first argument to slurm_call should be a function")
@@ -97,6 +98,8 @@ slurm_call <- function(f, params = list(), jobname = NA, global_objects = NULL, 
     }
     if(is.null(sh_template)) {
         sh_template <- system.file("templates/submit_single_sh.txt", package = "rslurm")
+    } else if(tolower(sh_template) == "inla") {
+        sh_template <- system.file("templates/submit_single_sh_inla.txt", package = "rslurm")
     }
         
     jobname <- make_jobname(jobname)
@@ -144,6 +147,10 @@ slurm_call <- function(f, params = list(), jobname = NA, global_objects = NULL, 
     } else {
         jobid <- NA
         cat(paste("Submission scripts output in directory", tmpdir,"\n"))
+    }
+
+    if(!is.null(upload)) {
+        system(paste0("scp -r ",tmpdir," ",upload,"@greatlakes-xfer.arc-ts.umich.edu:"))
     }
 
     # Return 'slurm_job' object

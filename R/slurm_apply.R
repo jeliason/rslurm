@@ -110,7 +110,8 @@ slurm_apply <- function(f, params, ..., jobname = NA, nodes = 2,
                         add_objects = NULL, pkgs = rev(.packages()),
                         libPaths = NULL, rscript_path = NULL, 
                         r_template = NULL, sh_template = NULL, 
-                        slurm_options = list(), submit = TRUE) {
+                        slurm_options = list(), submit = TRUE,
+                        upload = NULL) {
     # Check inputs
     if (!is.function(f)) {
         stop("first argument to slurm_apply should be a function")
@@ -140,6 +141,8 @@ slurm_apply <- function(f, params, ..., jobname = NA, nodes = 2,
     }
     if(is.null(sh_template)) {
         sh_template <- system.file("templates/submit_sh.txt", package = "rslurm")
+    } else if(tolower(sh_template) == "inla") {
+        sh_template <- system.file("templates/submit_sh_inla.txt", package = "rslurm")
     }
 
     jobname <- make_jobname(jobname)
@@ -208,6 +211,10 @@ slurm_apply <- function(f, params, ..., jobname = NA, nodes = 2,
     } else {
         jobid <- NA
         cat(paste("Submission scripts output in directory", tmpdir,"\n"))
+    }
+
+    if(!is.null(upload)) {
+        system(paste0("scp -r ",tmpdir," ",upload,"@greatlakes-xfer.arc-ts.umich.edu:"))
     }
 
     # Return 'slurm_job' object

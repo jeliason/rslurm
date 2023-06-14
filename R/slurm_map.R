@@ -107,7 +107,8 @@ slurm_map <- function(x, f, ..., jobname = NA, nodes = 2,
                       preschedule_cores = TRUE, job_array_task_limit = NULL, global_objects = NULL, 
                       pkgs = rev(.packages()), libPaths = NULL, 
                       rscript_path = NULL, r_template = NULL, sh_template = NULL, 
-                      slurm_options = list(), submit = TRUE) {
+                      slurm_options = list(), submit = TRUE,
+                      upload = NULL) {
     # Check inputs
     if (!is.list(x)) {
         stop("first argument to slurm_map should be a list")
@@ -128,6 +129,8 @@ slurm_map <- function(x, f, ..., jobname = NA, nodes = 2,
     }
     if(is.null(sh_template)) {
         sh_template <- system.file("templates/submit_sh.txt", package = "rslurm")
+    } else if(tolower(sh_template) == "inla") {
+        sh_template <- system.file("templates/submit_sh_inla.txt", package = "rslurm")
     }
 
     jobname <- make_jobname(jobname)
@@ -196,6 +199,10 @@ slurm_map <- function(x, f, ..., jobname = NA, nodes = 2,
     } else {
         jobid <- NA
         cat(paste("Submission scripts output in directory", tmpdir,"\n"))
+    }
+
+    if(!is.null(upload)) {
+        system(paste0("scp -r ",tmpdir," ",upload,"@greatlakes-xfer.arc-ts.umich.edu:"))
     }
 
     # Return 'slurm_job' object

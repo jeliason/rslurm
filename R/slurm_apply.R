@@ -214,7 +214,7 @@ slurm_apply <- function(f, params, ..., jobname = NA, nodes = 2,
     }
 
     if(!is.null(upload)) {
-        system(paste0("scp -r ",tmpdir," ",upload,"@greatlakes-xfer.arc-ts.umich.edu:"))
+        system(paste0("scp -r ",tmpdir," ",upload$user,"@greatlakes-xfer.arc-ts.umich.edu:",upload$directory))
     }
 
     # Return 'slurm_job' object

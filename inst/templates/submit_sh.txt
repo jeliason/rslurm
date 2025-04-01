@@ -6,6 +6,8 @@
 #SBATCH --mail-user=joelne@umich.edu
 #SBATCH --mail-type=END,FAIL
 #SBATCH --output=slurm_%a.out
+#SBATCH --error=slurm_%a.err
+
 {{#flags}}
 #SBATCH --{{{name}}}
 {{/flags}}
